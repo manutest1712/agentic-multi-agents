@@ -4,6 +4,9 @@ import os
 import time
 import dotenv
 import ast
+
+from dotenv import load_dotenv
+from smolagents import tool, LiteLLMModel, CodeAgent, ToolCallingAgent
 from sqlalchemy.sql import text
 from datetime import datetime, timedelta
 from typing import Dict, List, Union
@@ -580,6 +583,14 @@ def search_quote_history(search_terms: List[str], limit: int = 5) -> List[Dict]:
         result = conn.execute(text(query), params)
         return [dict(row._mapping) for row in result]
 
+def get_openai_client():
+    load_dotenv()
+    os.environ["OPENAI_BASE_URL"] = os.getenv(
+        "OPENAI_BASE_URL",
+        "https://openai.vocareum.com/v1"
+    )
+    os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
 ########################
 ########################
 ########################
@@ -598,11 +609,202 @@ def search_quote_history(search_terms: List[str], limit: int = 5) -> List[Dict]:
 
 # Tools for inventory agent
 
+@tool
+def get_inventory_snapshot_tool(as_of_date: str = None) -> Dict[str, int]:
+    """
+    Retrieve inventory snapshot as of a specific date.
 
-# Tools for quoting agent
+    Args:
+        as_of_date: The date in 'YYYY-MM-DD' format to check inventory levels.
+
+    Returns:
+        A dictionary mapping item names to available stock quantities.
+    Note: Do not call this multiple times for different dates unless specifically asked for a comparison.
+    Note: If date information is not available call the method with current date
+    """
+
+    if not as_of_date:
+        as_of_date = datetime.today().date().isoformat()
+
+    return get_all_inventory(as_of_date)
+
+
+@tool
+def get_stock_level_tool(item_name: str, as_of_date: str = None) -> Dict[str, int]:
+    """
+    Retrieve stock level for a specific item as of a given date.
+
+    Args:
+        item_name: The exact name of the paper product (e.g., 'A4 Ream').
+        as_of_date: The date in 'YYYY-MM-DD' format to check inventory levels.
+    Returns:
+        dict: A dictionary containing 'item_name', 'current_stock'.
+    """
+
+    # Convert date string to datetime if needed
+
+    if not as_of_date:
+        as_of_date = datetime.today().date().isoformat()
+
+    print(f"### As of Date is {as_of_date}")
+    try:
+        parsed_date = datetime.fromisoformat(as_of_date)
+    except ValueError:
+        parsed_date = as_of_date  # fallback if already valid
+
+    df = get_stock_level(item_name, parsed_date)
+
+    # Convert DataFrame to JSON-friendly dict
+    if isinstance(df, pd.DataFrame) and not df.empty:
+        return df.iloc[0].to_dict()
+
+    return {
+        "item_name": item_name,
+        "current_stock": 0
+    }
+
+@tool
+def supplier_delivery_date_tool(input_date_str: str, quantity: int) -> str:
+    """
+    Estimate the supplier delivery date based on order quantity and the order placement date.
+
+    This tool applies lead time rules based on volume:
+    - 1 to 10 units: Same day delivery.
+    - 11 to 100 units: 1-day lead time.
+    - 101 to 1000 units: 4-day lead time.
+    - Over 1000 units: 7-day lead time.
+
+    Args:
+        input_date_str: The date the order is initiated in 'YYYY-MM-DD' format.
+        quantity: The total number of paper units being requested from the supplier.
+
+    Returns:
+        str: The estimated arrival date for the supplies in 'YYYY-MM-DD' format.
+    """
+
+    return get_supplier_delivery_date(input_date_str, quantity)
+
+
+# ---------------------------
+# Tools for Quoting Agent
+# ---------------------------
+
+@tool
+def search_quote_history_tool(search_terms: List[str], limit: int = 5) -> List[Dict]:
+    """
+    Retrieve a list of historical quotes that match one or more search terms.
+
+    This tool searches both customer quote requests and stored quote explanations.
+    Results are ordered by most recent order date and limited to the specified count.
+
+    Args:
+        search_terms (List[str]): Keywords to match against customer requests and quote explanations.
+        limit (int, optional): Maximum number of quote records to return. Defaults to 5.
+
+    Returns:
+        List[Dict]: A list of matching quote records. Each dictionary contains:
+            - original_request (str): The original customer request text.
+            - total_amount (float): The quoted price.
+            - quote_explanation (str): Explanation or reasoning behind the quote.
+            - job_type (str): Type of job requested.
+            - order_size (str): Order size category.
+            - event_type (str): Event type associated with the request.
+            - order_date (str): Date the quote was created.
+    """
+    return search_quote_history(search_terms=search_terms, limit=limit)
+
 
 
 # Tools for ordering agent
+
+@tool
+def create_transaction_tool(
+    item_name: str,
+    transaction_type: str,
+    quantity: int,
+    price: float,
+    date: Union[str, datetime],
+) -> int:
+    """
+    Record a transaction in the system for stock purchases or product sales.
+
+    The transaction is inserted into the database transactions table.
+
+    Args:
+        item_name (str): Name of the product involved in the transaction.
+        transaction_type (str): Must be either 'stock_orders' or 'sales'.
+        quantity (int): Number of units involved in the transaction.
+        price (float): Total transaction price.
+        date (Union[str, datetime]): Transaction date in ISO format (YYYY-MM-DD)
+            or as a datetime object.
+
+    Returns:
+        int: The unique database ID of the newly created transaction record.
+
+    Raises:
+        ValueError: If transaction_type is not 'stock_orders' or 'sales'.
+        Exception: If database insertion fails or another runtime error occurs.
+    """
+
+    if transaction_type not in ["stock_orders", "sales"]:
+        raise ValueError("transaction_type must be either 'stock_orders' or 'sales'")
+
+    return create_transaction(
+        item_name=item_name,
+        transaction_type=transaction_type,
+        quantity=quantity,
+        price=price,
+        date=date,
+    )
+
+# Finance tools
+
+@tool
+def get_cash_balance_tool(as_of_date: Union[str, datetime]) -> float:
+    """
+    Compute the net company cash balance as of a specified date.
+
+    Cash balance is calculated as:
+        total sales revenue - total stock purchase costs
+
+    Only transactions dated on or before the given date are considered.
+
+    Args:
+        as_of_date (Union[str, datetime]): Cutoff date (inclusive), in ISO format
+            (YYYY-MM-DD) or as a datetime object.
+
+    Returns:
+        float: Net cash balance as of the given date.
+               Returns 0.0 if no transactions exist or if an error occurs.
+    """
+    return get_cash_balance(as_of_date=as_of_date)
+
+@tool
+def generate_financial_report_tool(as_of_date: Union[str, datetime]) -> Dict:
+    """
+    Generate a full financial report for the company as of a given date.
+
+    The report includes:
+        - Current cash balance
+        - Total inventory value
+        - Combined total assets
+        - Itemized inventory valuation
+        - Top 5 best-selling products by revenue
+
+    Args:
+        as_of_date (Union[str, datetime]): The cutoff date (inclusive) for the report,
+            either as an ISO string (YYYY-MM-DD) or a datetime object.
+
+    Returns:
+        Dict: A financial report dictionary containing:
+            - as_of_date (str): Report date
+            - cash_balance (float): Available cash
+            - inventory_value (float): Total inventory valuation
+            - total_assets (float): Cash + inventory value
+            - inventory_summary (List[Dict]): Inventory breakdown per item
+            - top_selling_products (List[Dict]): Top 5 revenue-generating products
+    """
+    return generate_financial_report(as_of_date=as_of_date)
 
 
 # Set up your agents and create an orchestration agent that will manage them.
@@ -610,10 +812,14 @@ def search_quote_history(search_terms: List[str], limit: int = 5) -> List[Dict]:
 
 # Run your test scenarios by writing them here. Make sure to keep track of them.
 
+
+
 def run_test_scenarios():
-    
+    get_openai_client()
     print("Initializing Database...")
-    init_database()
+    # Create an SQLite database
+    db_engine = create_engine("sqlite:///munder_difflin.db")
+    init_database(db_engine)
     try:
         quote_requests_sample = pd.read_csv("quote_requests_sample.csv")
         quote_requests_sample["request_date"] = pd.to_datetime(
@@ -631,6 +837,7 @@ def run_test_scenarios():
     current_cash = report["cash_balance"]
     current_inventory = report["inventory_value"]
 
+
     ############
     ############
     ############
@@ -638,6 +845,121 @@ def run_test_scenarios():
     ############
     ############
     ############
+
+    model = LiteLLMModel(
+        model_id="gpt-4o-mini"  # or gpt-4o / gpt-3.5-turbo
+    )
+
+    InventoryAgent = ToolCallingAgent(
+        name="InventoryAgent",
+        model=model,  # Ensure the model is passed here
+        description="A specialist that checks stock levels, manages inventory snapshots, and estimates supplier delivery dates.",
+        instructions="""
+        You manage inventory for Beaver's Choice Paper Company.
+        Your goals:
+        1. Answer stock level queries using 'get_stock_level_tool'.
+        2. If stock is below 20 units, use 'supplier_delivery_date_tool' to tell the user when new stock would arrive.
+        
+        STRICT RULES
+        1. If the user does NOT provide a date, use today's date (current system date).
+        2. NEVER invent random dates.
+        3. Always provide the item name and the exact stock count in your final answer
+        4. Do NOT repeat tool calls once a result is received
+        5. NEVER loop.
+        6. NEVER call tools repeatedly.
+        7. If the user provides a date:
+            - Call inventory tools ONLY with that date
+            - DO NOT retry without the date
+            - DO NOT fallback to latest data
+            - If result is empty, report it explicitly
+        """,
+        tools=[
+            get_stock_level_tool,
+            get_inventory_snapshot_tool,
+            supplier_delivery_date_tool
+        ]
+    )
+
+    QuoteAgent = ToolCallingAgent(
+        name="QuoteAgent",
+        model=model,
+        description="Handles pricing, quote history lookup, and quote reasoning.",
+        instructions="""
+        You handle customer pricing and quote history.
+
+        Responsibilities:
+        1. Retrieve past quotes using search_quote_history_tool
+        2. Explain pricing decisions clearly
+        3. NEVER fabricate quote records
+        4. If no quote history exists, say so clearly
+
+        Output must include:
+        - Pricing explanation
+        - Quote history summary (if available)
+        """,
+        tools=[
+            search_quote_history_tool
+        ]
+    )
+
+    SalesAgent = ToolCallingAgent(
+        name="SalesAgent",
+        model=model,
+        description="Finalizes sales, records transactions, and confirms orders.",
+        instructions="""
+        You handle order processing and transaction recording.
+
+        Responsibilities:
+        1. Confirm stock availability before processing orders
+        2. Record sales using create_transaction_tool
+        3. NEVER write transactions without user intent to buy
+        4. Always confirm item name, quantity, price, and date
+        """,
+        tools=[
+            create_transaction_tool, get_stock_level_tool
+        ]
+    )
+
+    FinanceAgent = ToolCallingAgent(
+        name="FinanceAgent",
+        model=model,
+        description="Manages financial analysis, cash flow, and reports.",
+        instructions="""
+        You manage company financials.
+
+        Responsibilities:
+        1. Compute cash balance using get_cash_balance_tool
+        2. Generate financial reports using generate_financial_report_tool
+        3. Always show monetary values clearly
+        """,
+        tools=[
+            get_cash_balance_tool,
+            generate_financial_report_tool
+        ]
+    )
+
+    OrchestratorAgent = CodeAgent(
+        name="OrchestratorAgent",
+        model=model,
+        instructions="""
+        You are the manager of Beaver's Choice Paper Company.
+        Route requests to the correct agent:
+        1. If a user asks about stock, call the InventoryAgent.
+        2. If a user wants a price,Call the QuoteAgent
+        3. If a user wants to buy, verify stock first, then call SalesAgent
+        4. Financial reporting → FinanceAgent
+        """,
+        tools=[],
+        managed_agents=[
+            InventoryAgent, QuoteAgent, FinanceAgent, SalesAgent
+        ]
+    )
+
+
+    print(OrchestratorAgent.run("Get stock details as of 1-Dec-2024 and display this in table format"))
+
+    #print(OrchestratorAgent.run("List all inventories for date upto 1-feb-2026"))
+
 
     results = []
     for idx, row in quote_requests_sample.iterrows():
@@ -693,6 +1015,8 @@ def run_test_scenarios():
     # Save results
     pd.DataFrame(results).to_csv("test_results.csv", index=False)
     return results
+
+
 
 
 if __name__ == "__main__":
