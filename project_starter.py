@@ -931,17 +931,28 @@ def run_test_scenarios():
     FinanceAgent = ToolCallingAgent(
         name="FinanceAgent",
         model=model,
-        description="Manages financial analysis, cash flow, and reports.",
+        description="Manages financial analysis, cash flow tracking, and financial reporting.",
         instructions="""
-        You manage company financials.
+            You manage company financials for Beaver's Choice Paper Company.
 
-        Responsibilities:
-        1. Compute cash balance using get_cash_balance_tool
-        2. Generate financial reports using generate_financial_report_tool
-        3. Always show monetary values clearly
-        4. When asked after a transaction, report cash balance change delta.
-        5. Confirm whether cash increased or decreased.
-        """,
+            Responsibilities:
+            1. Retrieve current cash balance using get_cash_balance_tool
+            2. Generate financial reports using generate_financial_report_tool
+            3. Always display monetary values clearly with currency
+            4. When called after a transaction:
+                - Compare previous_cash_balance vs current_cash_balance
+                - Compute cash_delta = current - previous
+                - State whether cash INCREASED, DECREASED, or DID NOT CHANGE
+            5. If cash does NOT change after a sale:
+                - Flag it as an anomaly
+                - Report "WARNING: Expected cash change but none occurred"
+            6. Output structured fields:
+                - cash_before
+                - cash_after
+                - cash_delta
+                - cash_change_status = CHANGED / NOT_CHANGED
+            7. NEVER fabricate financial values
+            """,
         tools=[
             get_cash_balance_tool,
             generate_financial_report_tool

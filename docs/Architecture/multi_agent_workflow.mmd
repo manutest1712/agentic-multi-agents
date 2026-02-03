@@ -3,40 +3,61 @@ flowchart TD
 User["User Request"]
 
 Orchestrator["OrchestratorAgent
-(Planner & Router)"]
+(Planner, Router & Workflow Manager)"]
 
 Inventory["InventoryAgent
-(Stock, Inventory & Supplier ETA)"]
+(Stock Lookup, Inventory Match & Supplier ETA)"]
 
 Sales["SalesAgent
-(Order Processing & Transactions)"]
+(Order Execution & Transaction Recording)"]
 
 Finance["FinanceAgent
-(Financial Reporting & Cash Flow)"]
+(Cash Balance Tracking & Reports)"]
 
 Quote["QuoteAgent
-(Pricing & Quote History)"]
+(Quote Estimation & Quote History Only)"]
 
 User --> Orchestrator
 
-Orchestrator -->|Stock Query| Inventory
-Orchestrator -->|Price Request| Quote
-Orchestrator -->|Purchase Request| Sales
-Orchestrator -->|Finance Request| Finance
+Orchestrator -->|Stock Request| Inventory
+Orchestrator -->|Quote Request| Quote
+Orchestrator -->|Confirmed Purchase| Sales
+Orchestrator -->|Finance Query| Finance
 
-Inventory -->|Low Stock → Supplier ETA| SupplierTool["supplier_delivery_date_tool()"]
-Inventory -->|Check Stock| StockTool["get_stock_level_tool()"]
-Inventory -->|Resolve Item Name| SnapshotTool["get_inventory_snapshot_tool()"]
+Inventory -->|Fetch Stock Count| StockTool["get_stock_level_tool()
+(Purpose: Retrieve item stock count
+Helper: get_stock_level())"]
 
+Inventory -->|Resolve Item Names| SnapshotTool["get_inventory_snapshot_tool()
+(Purpose: Find closest matching product
+Helper: get_all_inventory())"]
+
+Inventory -->|Low Stock ETA| SupplierTool["supplier_delivery_date_tool()
+(Purpose: Estimate restock date
+Helper: supplier_delivery_date())"]
 
 Sales -->|Verify Stock| StockTool
-Sales -->|Resolve Item Name| SnapshotTool
-Sales -->|Record Sale| TransactionTool["create_transaction_tool()"]
+Sales -->|Resolve Items| SnapshotTool
+Sales -->|Create Transaction| TransactionTool["create_transaction_tool()
+(Purpose: Record sales & reduce inventory
+Helper: create_transaction())"]
 
-Quote -->|Retrieve Quote History| QuoteTool["search_quote_history_tool()"]
+TransactionTool -->|Transaction Amount + Status| Sales
+Sales -->|Transaction Amount| Finance
 
-Finance -->|Check Cash Balance| CashTool["get_cash_balance_tool()"]
-Finance -->|Generate Reports| ReportTool["generate_financial_report_tool()"]
+Quote -->|Retrieve Quote History| QuoteTool["search_quote_history_tool()
+(Purpose: Fetch prior quotes
+Helper: search_quote_history())"]
+
+Finance -->|Fetch Cash Balance| CashTool["get_cash_balance_tool()
+(Purpose: Return current cash balance
+Helper: get_cash_balance())"]
+
+Finance -->|Generate Financial Report| ReportTool["generate_financial_report_tool()
+(Purpose: Summarize financial state
+Helper: generate_financial_report())"]
+
+Finance -->|Cash Delta Update| Orchestrator
 
 Inventory --> Orchestrator
 Quote --> Orchestrator
