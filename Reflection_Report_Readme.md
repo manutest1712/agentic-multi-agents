@@ -12,7 +12,7 @@ decision‑making**.
 
 Below is the system architecture diagram referenced in this project:
 
-![Agent Architecture](docs/Architecture/Screenshot 2026-02-03 164556.png)
+![Agent Architecture](docs/Architecture/Architecture.png)
 
 ### Agent Roles
 
