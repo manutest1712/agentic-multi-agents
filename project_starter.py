@@ -872,6 +872,9 @@ def run_test_scenarios():
             - DO NOT retry without the date
             - DO NOT fallback to latest data
             - If result is empty, report it explicitly
+        8. If get_stock_level_tool call returns no result, use the get_inventory_snapshot_tool tool to see available products and find the closest match manually
+        9. If no reasonable product match exists OR stock is insufficient, explicitly REJECT the request.
+        10. When rejecting, clearly state the reason (e.g., "Insufficient stock", "Product unavailable").
         """,
         tools=[
             get_stock_level_tool,
@@ -914,9 +917,14 @@ def run_test_scenarios():
         2. Record sales using create_transaction_tool
         3. NEVER write transactions without user intent to buy
         4. Always confirm item name, quantity, price, and date
+        5. After recording a transaction, confirm that company cash balance changed.
+        6. Report the cash delta (before vs after).
+        7. Mark successful purchases as STATUS = CASH_CHANGED.
+        STRICT RULES
+         If get_stock_level_tool call returns no results, use the get_inventory_snapshot_tool tool to see available products and find the closest match manually
         """,
         tools=[
-            create_transaction_tool, get_stock_level_tool
+            create_transaction_tool, get_stock_level_tool, get_inventory_snapshot_tool
         ]
     )
 
@@ -931,6 +939,8 @@ def run_test_scenarios():
         1. Compute cash balance using get_cash_balance_tool
         2. Generate financial reports using generate_financial_report_tool
         3. Always show monetary values clearly
+        4. When asked after a transaction, report cash balance change delta.
+        5. Confirm whether cash increased or decreased.
         """,
         tools=[
             get_cash_balance_tool,
@@ -938,7 +948,7 @@ def run_test_scenarios():
         ]
     )
 
-    OrchestratorAgent = CodeAgent(
+    OrchestratorAgent = ToolCallingAgent(
         name="OrchestratorAgent",
         model=model,
         instructions="""
@@ -948,6 +958,14 @@ def run_test_scenarios():
         2. If a user wants a price,Call the QuoteAgent
         3. If a user wants to buy, verify stock first, then call SalesAgent
         4. Financial reporting → FinanceAgent
+        After each request:
+            Return a structured record with the following field values that can be saved to a CSV File
+            - request_id
+            - request_date
+            - cash_balance
+            - inventory_value
+            - response
+        If a field value is not available, please leave the field value as empty string
         """,
         tools=[],
         managed_agents=[
@@ -956,9 +974,26 @@ def run_test_scenarios():
     )
 
 
-    print(OrchestratorAgent.run("Get stock details as of 1-Dec-2024 and display this in table format"))
+    query = """
+    I hope this message finds you well. I would like to place a large order for paper supplies for an upcoming reception. 
 
-    #print(OrchestratorAgent.run("List all inventories for date upto 1-feb-2026"))
+We need the following items:
+- 1000 sheets of A4 printing paper
+- 500 sheets of glossy photo paper
+- 200 table covers made of recyclable paper
+- 300 paper napkins
+
+The materials are needed by Feb 15, 2026, to ensure we have everything prepared for the event.
+
+Thank you for your assistance.
+
+Best regards,
+Manu
+"""
+
+    # #print(OrchestratorAgent.run("Get stock details as of 3-Feb-2026 and display this in table format"))
+    # print(OrchestratorAgent.run(query))
+    # #print(OrchestratorAgent.run("List all inventories for date upto 1-feb-2026"))
 
 
     results = []
@@ -982,6 +1017,7 @@ def run_test_scenarios():
         ############
         ############
 
+        response = OrchestratorAgent.run(request_with_date)
         # response = call_your_multi_agent_system(request_with_date)
 
         # Update state

@@ -1,0 +1,46 @@
+flowchart TD
+
+User["User Request"]
+
+Orchestrator["OrchestratorAgent
+(Planner & Router)"]
+
+Inventory["InventoryAgent
+(Stock, Inventory & Supplier ETA)"]
+
+Sales["SalesAgent
+(Order Processing & Transactions)"]
+
+Finance["FinanceAgent
+(Financial Reporting & Cash Flow)"]
+
+Quote["QuoteAgent
+(Pricing & Quote History)"]
+
+User --> Orchestrator
+
+Orchestrator -->|Stock Query| Inventory
+Orchestrator -->|Price Request| Quote
+Orchestrator -->|Purchase Request| Sales
+Orchestrator -->|Finance Request| Finance
+
+Inventory -->|Low Stock → Supplier ETA| SupplierTool["supplier_delivery_date_tool()"]
+Inventory -->|Check Stock| StockTool["get_stock_level_tool()"]
+Inventory -->|Resolve Item Name| SnapshotTool["get_inventory_snapshot_tool()"]
+
+
+Sales -->|Verify Stock| StockTool
+Sales -->|Resolve Item Name| SnapshotTool
+Sales -->|Record Sale| TransactionTool["create_transaction_tool()"]
+
+Quote -->|Retrieve Quote History| QuoteTool["search_quote_history_tool()"]
+
+Finance -->|Check Cash Balance| CashTool["get_cash_balance_tool()"]
+Finance -->|Generate Reports| ReportTool["generate_financial_report_tool()"]
+
+Inventory --> Orchestrator
+Quote --> Orchestrator
+Sales --> Orchestrator
+Finance --> Orchestrator
+
+Orchestrator --> User
