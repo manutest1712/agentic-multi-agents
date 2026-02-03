@@ -850,10 +850,10 @@ def run_test_scenarios():
         model_id="gpt-4o-mini"  # or gpt-4o / gpt-3.5-turbo
     )
 
-    InventoryAgent = ToolCallingAgent(
+    inventory_agent = ToolCallingAgent(
         name="InventoryAgent",
         model=model,  # Ensure the model is passed here
-        description="A specialist that checks stock levels, manages inventory snapshots, and estimates supplier delivery dates.",
+        description="A specialist that checks stock levels, manages inventory snapshots, and estimates supplier delivery dates. Rejects unavailable or insufficient stock",
         instructions="""
         You manage inventory for Beaver's Choice Paper Company.
         Your goals:
@@ -875,6 +875,8 @@ def run_test_scenarios():
         8. If get_stock_level_tool call returns no result, use the get_inventory_snapshot_tool tool to see available products and find the closest match manually
         9. If no reasonable product match exists OR stock is insufficient, explicitly REJECT the request.
         10. When rejecting, clearly state the reason (e.g., "Insufficient stock", "Product unavailable").
+        11. NEVER confirm fulfillment if stock < requested quantity
+        12. NEVER suggest supplier ETA unless supplier_delivery_date_tool is called
         """,
         tools=[
             get_stock_level_tool,
@@ -883,7 +885,7 @@ def run_test_scenarios():
         ]
     )
 
-    QuoteAgent = ToolCallingAgent(
+    quote_agent = ToolCallingAgent(
         name="QuoteAgent",
         model=model,
         description="Handles pricing, quote history lookup, and quote reasoning.",
@@ -892,20 +894,22 @@ def run_test_scenarios():
 
         Responsibilities:
         1. Retrieve past quotes using search_quote_history_tool
-        2. Explain pricing decisions clearly
-        3. NEVER fabricate quote records
-        4. If no quote history exists, say so clearly
+        2. If a quote exists → mark STATUS = QUOTE_FULFILLED
+        3. If no quote exists → mark STATUS = QUOTE_NOT_FOUND
+        4. NEVER fabricate prices or history
+        5. Explain why quote exists or why it cannot be provided
 
-        Output must include:
-        - Pricing explanation
-        - Quote history summary (if available)
+        Output Format:
+        - status = QUOTE_FULFILLED / QUOTE_NOT_FOUND
+        - price (if available)
+        - rationale
         """,
         tools=[
             search_quote_history_tool
         ]
     )
 
-    SalesAgent = ToolCallingAgent(
+    sales_agent = ToolCallingAgent(
         name="SalesAgent",
         model=model,
         description="Finalizes sales, records transactions, and confirms orders.",
@@ -921,14 +925,17 @@ def run_test_scenarios():
         6. Report the cash delta (before vs after).
         7. Mark successful purchases as STATUS = CASH_CHANGED.
         STRICT RULES
-         If get_stock_level_tool call returns no results, use the get_inventory_snapshot_tool tool to see available products and find the closest match manually
+         a. If get_stock_level_tool call returns no results, use the get_inventory_snapshot_tool tool to see available products and find the closest match manually
+         b. If stock is available and price exists:
+            - The transaction MUST reduce cash balance
+            - Do NOT claim successful order if cash is unchanged
         """,
         tools=[
             create_transaction_tool, get_stock_level_tool, get_inventory_snapshot_tool
         ]
     )
 
-    FinanceAgent = ToolCallingAgent(
+    finance_agent = ToolCallingAgent(
         name="FinanceAgent",
         model=model,
         description="Manages financial analysis, cash flow tracking, and financial reporting.",
@@ -952,6 +959,9 @@ def run_test_scenarios():
                 - cash_delta
                 - cash_change_status = CHANGED / NOT_CHANGED
             7. NEVER fabricate financial values
+            8. If SalesAgent claims success but cash does NOT change:
+                - Flag ERROR_TRANSACTION_MISMATCH
+            9. NEVER show internal financial distress in customer response
             """,
         tools=[
             get_cash_balance_tool,
@@ -959,7 +969,7 @@ def run_test_scenarios():
         ]
     )
 
-    OrchestratorAgent = ToolCallingAgent(
+    orchestrator_agent = ToolCallingAgent(
         name="OrchestratorAgent",
         model=model,
         instructions="""
@@ -980,7 +990,7 @@ def run_test_scenarios():
         """,
         tools=[],
         managed_agents=[
-            InventoryAgent, QuoteAgent, FinanceAgent, SalesAgent
+            inventory_agent, quote_agent, finance_agent, sales_agent
         ]
     )
 
@@ -1028,7 +1038,7 @@ Manu
         ############
         ############
 
-        response = OrchestratorAgent.run(request_with_date)
+        response = orchestrator_agent.run(request_with_date)
         # response = call_your_multi_agent_system(request_with_date)
 
         # Update state
