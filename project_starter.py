@@ -289,6 +289,16 @@ def create_transaction(
 
         # Fetch and return the ID of the inserted row
         result = pd.read_sql("SELECT last_insert_rowid() as id", db_engine)
+
+        print(
+            f"~~~~~~#####Transaction Recorded:\n"
+            f"Item Name: {item_name}\n"
+            f"Transaction Type: {transaction_type}\n"
+            f"Units: {quantity}\n"
+            f"Price: {price}\n"
+            f"Transaction Date: {date_str}"
+            f"Transaction ID {int(result.iloc[0]["id"])}"
+        )
         return int(result.iloc[0]["id"])
 
     except Exception as e:
@@ -444,8 +454,9 @@ def get_cash_balance(as_of_date: Union[str, datetime]) -> float:
         if not transactions.empty:
             total_sales = transactions.loc[transactions["transaction_type"] == "sales", "price"].sum()
             total_purchases = transactions.loc[transactions["transaction_type"] == "stock_orders", "price"].sum()
-            return float(total_sales - total_purchases)
-
+            cash_balance = float(total_sales - total_purchases)
+            print(f"####~~~~~~~~##### -Cash Balance is {cash_balance}")
+            return cash_balance
         return 0.0
 
     except Exception as e:
@@ -870,7 +881,7 @@ def run_test_scenarios():
         7. If the user provides a date:
             - Call inventory tools ONLY with that date
             - DO NOT retry without the date
-            - DO NOT fallback to latest data
+            - DO NOT fallback to latest date
             - If result is empty, report it explicitly
         8. If get_stock_level_tool call returns no result, use the get_inventory_snapshot_tool tool to see available products and find the closest match manually
         9. If no reasonable product match exists OR stock is insufficient, explicitly REJECT the request.
@@ -927,11 +938,16 @@ def run_test_scenarios():
         STRICT RULES
          a. If get_stock_level_tool call returns no results, use the get_inventory_snapshot_tool tool to see available products and find the closest match manually
          b. If stock is available and price exists:
-            - The transaction MUST reduce cash balance
+            - The transaction MUST reduce cash balance. This should be checked with get_cash_balance_tool
             - Do NOT claim successful order if cash is unchanged
+         c. When calling create_transaction_tool ensure that price is passed. It cannot be None or 0.0
+         d. If the user provides a date:
+            - Call get_stock_level_tool ONLY with that date
+            - DO NOT retry without the date
+            - DO NOT fallback to latest date
         """,
         tools=[
-            create_transaction_tool, get_stock_level_tool, get_inventory_snapshot_tool
+            create_transaction_tool, get_stock_level_tool, get_inventory_snapshot_tool, get_cash_balance_tool
         ]
     )
 
@@ -979,14 +995,10 @@ def run_test_scenarios():
         2. If a user wants a price,Call the QuoteAgent
         3. If a user wants to buy, verify stock first, then call SalesAgent
         4. Financial reporting → FinanceAgent
-        After each request:
-            Return a structured record with the following field values that can be saved to a CSV File
-            - request_id
-            - request_date
-            - cash_balance
-            - inventory_value
-            - response
-        If a field value is not available, please leave the field value as empty string
+        After each request, return a response that can be shared with the user.
+        STRICT RULES:
+          a. Should not contain sensitive information like cash balance
+          b. Do not include details other than the relevant requested details
         """,
         tools=[],
         managed_agents=[
