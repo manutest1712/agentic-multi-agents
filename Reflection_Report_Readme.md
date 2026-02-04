@@ -1,12 +1,18 @@
 # Reflection Report --- Multi‑Agent System (Beaver's Choice Paper Company)
 
-## 1. Agent Workflow Diagram Explanation & Architecture Decisions
+## Agent Workflow Diagram Explanation & Architecture Decisions
 
 The system uses a **multi‑agent architecture** coordinated by a central
 **OrchestratorAgent**, which routes user requests to specialized agents
 based on intent. This architecture was chosen to ensure **clear
 separation of responsibilities, modularity, and explainable
 decision‑making**.
+
+## Agent Architecture Diagram
+
+Below is the system architecture diagram referenced in this project:
+
+![Agent Architecture](docs/Architecture/Architecture.png)
 
 ### Agent Roles
 
