@@ -1,55 +1,59 @@
 request_id,request_date,cash_balance,inventory_value,response
-1,2025-04-01,45059.7,4940.299999999999,"The order for 200 sheets of A4 glossy paper, 100 sheets of heavy cardstock (white), and 100 sheets of colored paper (assorted colors) has been finalized successfully and will be delivered by April 15, 2025. All requested items are in stock. However, please note that the heavy cardstock is substituted with a product listed as 'Cardstock' which should be suitable for your needs."
-2,2025-04-03,45059.7,4940.299999999999,"The order for 500 sheets of colorful poster paper and 300 rolls of streamers has been successfully placed for delivery by April 15, 2025. However, there is a shortage of 200 balloons as they are currently unavailable in stock."
-3,2025-04-04,45059.7,4940.299999999999,"The order for 10,000 sheets of A4 paper, 5,000 sheets of A3 paper, and 500 reams of printer paper cannot be processed due to insufficient stock levels. We only have 272 sheets of A4 paper available, and there is no stock for A3 paper and printer paper. You may need to adjust the order quantities or source these items from another supplier."
-4,2025-04-05,45059.7,4940.299999999999,"The order for 500 sheets of high-quality, recycled cardstock and 250 sheets of A4 size printer paper has been successfully processed, though the cardstock may be contingent on stock availability. The total cost for the cardstock is $60, and for the printer paper it is $12.50. The delivery is expected by April 15, 2025."
-5,2025-04-05,45059.7,4940.299999999999,"Unable to place the order for 500 sheets of 8.5""x11"" colored paper, 300 sheets of cardstock in various colors, and 200 rolls of decorative washi tape due to insufficient stock for all requested items. All three items are currently out of stock, and it would be beneficial to consider restocking options or alternative suppliers."
-6,2025-04-06,45859.7,4890.3,"The order has been processed for 500 sheets of colorful construction paper and 300 sheets of white printer paper. However, the request for 200 sheets of cardstock cannot be fulfilled due to unavailability. The items ordered are set to be delivered by April 15, 2025."
-7,2025-04-07,45859.7,4890.3,"The order for the following supplies has been successfully recorded:
-- 500 sheets of glossy A4 paper
-- 1000 sheets of matte A3 paper
-- 300 large poster boards (24"" x 36"")
+1,2025-04-01,45059.7,4940.299999999999,"Currently, we do not have any A4 glossy paper in stock, which means we will be unable to fulfill the request for 200 sheets. However, we can fulfill the orders for 100 sheets of heavy cardstock (white) and 100 sheets of colored paper (assorted colors). We may need to consider ordering A4 glossy paper from suppliers to meet this requirement."
+2,2025-04-03,45059.7,4940.299999999999,"Unfortunately, we currently have insufficient stock to fulfill your order for 200 balloons, as there are none available in our inventory at this time. We can proceed with the order for 500 sheets of colorful poster paper and 300 rolls of streamers. Please let me know how you would like to handle the balloon order."
+3,2025-04-04,45059.7,4940.299999999999,"Unfortunately, we cannot fulfill your order for 10,000 sheets of A4 paper, 5,000 sheets of A3 paper, and 500 reams of printer paper due to insufficient stock. We only have 272 sheets of A4 paper available. A3 paper and printer paper are currently out of stock. 
 
-Note: The heavyweight cardstock was unavailable. Please consider alternative products if required."
-8,2025-04-07,46032.7,4890.3,"The order for the following paper supplies has been successfully recorded for delivery on March 8, 2025:
-- 500 sheets of A4 glossy paper
-- 1000 sheets of A4 matte paper
-- 2000 sheets of A5 colored paper
-- 3000 sheets of A4 recycled paper
+To proceed, we can either look into sourcing additional stock for A3 and printer paper from suppliers or adjust your order based on the available A4 paper."
+4,2025-04-05,45059.7,4940.299999999999,"Unfortunately, we currently cannot fulfill your order for 500 sheets of high-quality recycled cardstock, as there is no stock available. Additionally, the order for 250 sheets of A4 size printer paper cannot be finalized because the stock has run low even though there was an initial availability of 272 sheets. No orders can be placed for these items unless stock is replenished."
+5,2025-04-05,44964.7,5035.3,"The order for 500 sheets of 8.5""x11"" colored paper cannot be fulfilled due to unavailability. An order for 300 sheets of cardstock and 200 rolls of decorative washi tape was successfully placed, but these items are also currently out of stock. Both orders will be delivered as soon as the items are back in stock, expected around October 9, 2023."
+6,2025-04-06,44964.7,5035.3,"Currently, we are unable to fulfill your order due to the unavailability of the requested cardstock in various colors. Additionally, there are no existing quotes for the specified quantities of colorful construction paper and white printer paper, which suggests we may need to contact suppliers directly for pricing. 
 
-All items were confirmed available in stock."
-9,2025-04-07,46032.7,4890.3,"The order can be finalized for 200 sheets of A4 white printer paper for delivery by April 10, 2025. However, the order cannot be fulfilled for 100 sheets of A3 glossy paper as it is currently out of stock."
-13,2025-04-08,46032.7,4890.3,"The order for 500 sheets of A4 printing paper and 200 sheets of cardstock has been successfully finalized for delivery on April 14, 2025."
-12,2025-04-08,46032.7,4890.3,"We currently have 200 sheets of colorful cardstock and 500 sheets of standard printer paper available for your order. However, we do not have any paper napkins in stock (0 units available). Therefore, we can fulfill your order for the cardstock and printer paper but will need to either wait to restock the napkins or consider alternatives."
-10,2025-04-08,46032.7,4890.3,"We could not fulfill the order for 500 sheets of high-quality glossy paper as it is out of stock. However, we can proceed with ordering 636 sheets of 100 lb cover stock for the upcoming show, which is available. Please let me know if you would like to proceed with this order or consider alternative options for the glossy paper."
-11,2025-04-08,46080.7,4890.3,"The order for 500 sheets of A3 glossy paper has been placed successfully, but the request for 300 sheets of A4 matte paper could not be fulfilled due to insufficient stock (-2000 sheets). An alternative, regular A4 paper, is available if you wish to proceed with that option."
-14,2025-04-09,46104.7,4890.2,"The order for A4 paper and cardstock has been successfully completed. However, both poster paper and colored paper are currently out of stock and will be restocked soon. The current stock situation includes:
-- **A4 Paper**: Successfully ordered.
-- **Cardstock**: Successfully ordered.
-- **Poster Paper**: Out of stock (-4000 units), restock is expected by October 7, 2023.
-- **Colored Paper**: Out of stock (0 units), restock is expected by October 10, 2023.
+To proceed, we will need to explore other options or contact suppliers for a quote on 500 sheets of colorful construction paper and 300 sheets of white printer paper. Please let us know how you would like to move forward."
+7,2025-04-07,44964.7,5035.3,"The order has been placed successfully for the following items: 
+- 500 sheets of glossy A4 paper 
+- 300 poster boards (24"" x 36"")
 
-Alternatives such as 100 lb cover stock, 80 lb text paper, A3 paper, and large poster paper are available in the inventory."
-15,2025-04-12,46279.7,4390.2,"The order was placed successfully for the following paper supplies: 10,000 sheets of A4 white paper and 5,000 sheets of A3 colored paper (assorted colors), with delivery required by April 15, 2025. Unfortunately, the order for 500 reams of cardboard for signage could not be placed due to insufficient stock."
-16,2025-04-13,46279.7,4390.2,"I regret to inform you that the order for 500 sheets of A4 printer paper, 200 sheets of colorful construction paper, and 100 sheets of poster board cannot be fulfilled due to insufficient stock levels of all requested items. We suggest exploring alternative suppliers or checking back later for inventory updates."
-17,2025-04-14,46486.7,4330.2,"Currently, we are facing significant stock shortages for all requested items for your upcoming reception. Here are the updates on the inventory and associated actions:
+However, the order for 1000 sheets of matte A3 paper could not be fulfilled due to insufficient stock. An additional order will be needed for this item. Please let me know how you would like to proceed with the matte A3 paper."
+8,2025-04-07,44964.7,5035.3,"The order for 500 sheets of A4 glossy paper, 1000 sheets of A4 matte paper, 2000 sheets of A5 colored paper, and 3000 sheets of A4 recycled paper cannot be fulfilled due to insufficient stock. Specifically, only 87 sheets of A4 glossy paper are available, and there is no stock for A4 matte paper, A5 colored paper, or A4 recycled paper. Restocking or alternative products may be needed to meet the order requirements."
+9,2025-04-07,44964.7,5035.3,"Unfortunately, we are unable to fulfill your order for paper supplies at this time due to stock unavailability. Specifically:
+- We have no stock of A4 white printer paper.
+- We have insufficient stock of A3 glossy paper (only 87 sheets available when 100 are needed).
+- The 100% recycled kraft paper envelopes are also out of stock.
 
-1. **A4 White Printer Paper**: We are currently short by 200 sheets.
-2. **A3 Colored Paper**: No stock is available.
-3. **White Table Napkins**: No stock is available.
-4. **Biodegradable Paper Cups**: No stock is available.
-5. **Biodegradable Paper Plates**: No stock is available.
+If you would like to explore alternative options or consider restocking these items, please let us know!"
+13,2025-04-08,44964.7,5035.3,"Your order for 500 sheets of A4 printing paper and 200 sheets of cardstock has been successfully recorded. The estimated delivery date is set for April 14, 2025."
+12,2025-04-08,44964.7,5035.3,"Unfortunately, the order for 200 sheets of colorful cardstock, 500 sheets of standard printer paper, and 100 paper napkins cannot be finalized due to stock unavailability. None of the requested items are currently in stock. Please consider ordering alternative items or replenishing inventory to facilitate future orders."
+10,2025-04-08,44964.7,5035.3,"We are unable to place the order for 500 sheets of high-quality glossy paper and 300 sheets of sturdy cardstock due to insufficient stock for both items. An alternative, '100 lb cover stock,' is available, but it does not fulfill the original request. Please confirm if you would like to proceed with the '100 lb cover stock' as a substitute or if you prefer to wait for a restock."
+11,2025-04-08,44964.7,5035.3,"An order for 500 sheets of A3 glossy paper has been successfully placed, but it is important to note that the item ordered was recorded as 'Glossy paper' due to limited stock. Please verify if this meets your requirements. The supplies are scheduled for delivery by April 15, 2025."
+14,2025-04-09,47464.7,2535.2999999999993,"The order for 5,000 sheets of A4 paper, 2,000 sheets of poster paper in various colors, and 500 sheets of cardstock has been placed successfully; however, it must be noted that stock levels are insufficient for all requested items. Currently, A4 paper and poster paper are unavailable, and the cardstock quantity is also insufficient. You may need to consider sourcing these items from alternative suppliers or adjusting your order."
+15,2025-04-12,47464.7,2535.2999999999993,"I am unable to fulfill your order for 500 reams of cardboard for signage as there is no stock available. Currently, alternative products like Kraft paper and banner paper are in stock, but none of these meet the specifications for signage cardboard. You may need to consider placing an order with suppliers to restock cardboard for signage. Please let me know how you would like to proceed with your order."
+16,2025-04-13,47464.7,2535.2999999999993,"The order for 500 sheets of A4 printer paper, 200 sheets of colorful construction paper, and 100 sheets of poster board could not be fulfilled due to stock unavailability. None of these items are available in stock, meaning an order cannot be placed at this time. It is advised to either explore purchasing these items from alternate suppliers or consider similar products that are readily available."
+17,2025-04-14,47714.7,2285.2999999999993,"Unfortunately, we are unable to place your order for the requested paper supplies due to a lack of stock for all items. Here is a summary of the availability for your request:
 
-Considering these shortages, it's advisable to reach out directly to suppliers for restocking and potential orders. I can assist you in requesting quotes from specific suppliers for these items if needed."
-18,2025-04-14,46486.7,4330.2,"Unfortunately, we could not fulfill the original request for 500 sheets of high-quality white cardstock, 1000 sheets of standard printing paper, and 200 sheets of colored paper due to stock shortages. Currently, we have the following alternative options available for the upcoming ceremony: 
+- 1000 sheets of A4 white printer paper: **0 units available**
+- 500 sheets of A3 colored paper: **0 units available**
+- 2000 table napkins (white): **0 units available**
+- 1000 biodegradable paper cups: **0 units available**
+- 500 biodegradable paper plates: **0 units available**
 
-1. **100 lb Cover Stock**: 636 sheets available, ideal for high-quality prints such as invitations and brochures.
-2. **80 lb Text Paper**: 249 sheets available, suitable for everyday documents like programs and handouts.
+Currently, the only available items in stock do not match your needs. You may want to consider alternative suppliers, adjust your order, or wait for restocking. The required delivery date is April 15, 2025, which gives some time to make arrangements."
+18,2025-04-14,48794.7,1205.2999999999997,"The order for 500 sheets of high-quality white cardstock, 1000 sheets of standard printing paper, and 200 sheets of colored paper could not be completed due to stock unavailability. It is recommended to review the inventory system and explore alternative products."
+19,2025-04-15,49712.7,287.2999999999999,"Unfortunately, we are unable to fulfill your order for the upcoming exhibition as we have insufficient stock for all requested paper types:
+- 2000 sheets of A4 glossy paper: 0 units available
+- 1500 sheets of A3 matte paper: 0 units available
+- 1000 sheets of cardstock in assorted colors: 0 units available
 
-Additionally, other paper types in stock include A3, A4 white paper, banner paper, butcher paper, and more. Please let us know how you would like to proceed or if you would like to explore these alternatives."
-19,2025-04-15,46681.2,4235.2,"Unfortunately, your order cannot be processed as specified due to insufficient stock. Specifically, there is no stock available for:
-- 2000 sheets of A4 glossy paper
-- 1000 sheets of cardstock in assorted colors
+Currently, the only items available in our inventory are:
+- Banner paper: 793 sheets
+- Butcher paper: 365 sheets
+- Crepe paper: 234 sheets
+- Kraft paper: 493 sheets
+- Paper plates: 748 units
+- Patterned paper: 348 sheets
+- Photo paper: 223 sheets
+- Presentation folders: 389 units
+- Rolls of banner paper (36-inch width): 546 units
+- Table covers: 736 units
 
-However, 1500 sheets of A3 matte paper cannot be supplied without issue as there are 18,000 sheets available in stock. Please consider alternate options for the A4 glossy paper and cardstock, or we can estimate a delivery date once restocking is available."
-20,2025-04-17,46681.2,4235.2,"Unfortunately, we currently have no stock available for tickets, and thus, I cannot fulfill your order for 10,000 tickets. It is advisable to either restock tickets from suppliers or explore alternative options. We do have other paper supplies available, including 5,000 flyers and 2,000 posters if you wish to proceed with those."
+Please let us know if you would like to explore alternative products or consider placing a new order for the requested items."
+20,2025-04-17,49712.7,287.2999999999999,"Unfortunately, we cannot fulfill the order for 5,000 flyers, 2,000 posters, and 10,000 tickets as there is currently no stock available for these items. It is recommended to source these items from external suppliers or consider adjusting your order to match available inventory, which includes various paper products."

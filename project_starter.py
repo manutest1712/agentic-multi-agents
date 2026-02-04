@@ -246,7 +246,6 @@ def create_transaction(
     item_name: str,
     transaction_type: str,
     quantity: int,
-    price: float,
     date: Union[str, datetime],
 ) -> int:
     """
@@ -257,7 +256,6 @@ def create_transaction(
         item_name (str): The name of the item involved in the transaction.
         transaction_type (str): Either 'stock_orders' or 'sales'.
         quantity (int): Number of units involved in the transaction.
-        price (float): Total price of the transaction.
         date (str or datetime): Date of the transaction in ISO 8601 format.
 
     Returns:
@@ -267,14 +265,29 @@ def create_transaction(
         ValueError: If `transaction_type` is not 'stock_orders' or 'sales'.
         Exception: For other database or execution errors.
     """
+
     try:
         # Convert datetime to ISO string if necessary
         date_str = date.isoformat() if isinstance(date, datetime) else date
+
+        cash_balance = get_cash_balance(date_str)
 
         # Validate transaction type
         if transaction_type not in {"stock_orders", "sales"}:
             raise ValueError("Transaction type must be 'stock_orders' or 'sales'")
 
+        df = pd.read_sql(
+            "SELECT unit_price FROM inventory WHERE item_name = :name",
+            db_engine,
+            params={"name": item_name}
+        )
+
+        if df.empty:
+            raise ValueError(f"No unit price found for {item_name}")
+
+        unit_price = float(df.iloc[0]["unit_price"])
+        price = unit_price * quantity
+        print(f"Item {item_name}, quantity {quantity}, unit price = {unit_price}, price = {price}")
         # Prepare transaction record as a single-row DataFrame
         transaction = pd.DataFrame([{
             "item_name": item_name,
@@ -299,6 +312,9 @@ def create_transaction(
             f"Transaction Date: {date_str}"
             f"Transaction ID {int(result.iloc[0]["id"])}"
         )
+
+        cash_balance1 = get_cash_balance(date_str)
+        print(f"$$$$$$ - Old Cash Balance - {cash_balance}, New balance - {cash_balance1}, Price {price}")
         return int(result.iloc[0]["id"])
 
     except Exception as e:
@@ -733,7 +749,6 @@ def create_transaction_tool(
     item_name: str,
     transaction_type: str,
     quantity: int,
-    price: float,
     date: Union[str, datetime],
 ) -> int:
     """
@@ -745,7 +760,6 @@ def create_transaction_tool(
         item_name (str): Name of the product involved in the transaction.
         transaction_type (str): Must be either 'stock_orders' or 'sales'.
         quantity (int): Number of units involved in the transaction.
-        price (float): Total transaction price.
         date (Union[str, datetime]): Transaction date in ISO format (YYYY-MM-DD)
             or as a datetime object.
 
@@ -760,13 +774,15 @@ def create_transaction_tool(
     if transaction_type not in ["stock_orders", "sales"]:
         raise ValueError("transaction_type must be either 'stock_orders' or 'sales'")
 
+
     return create_transaction(
         item_name=item_name,
         transaction_type=transaction_type,
         quantity=quantity,
-        price=price,
         date=date,
     )
+
+
 
 # Finance tools
 
